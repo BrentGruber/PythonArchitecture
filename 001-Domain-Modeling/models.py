@@ -1,17 +1,24 @@
 from dataclasses import dataclass
-from typing import Optional
+from locale import strcoll
+from typing import Optional, NewType
 from datetime import date
+
+
+# Define types to aid in type safety
+Quantity = NewType("Quantity", int)
+Sku = NewType("Sku", str)
+Reference = NewType("Reference", str)
 
 
 @dataclass(frozen=True) #frozen=True makes this immutable
 class OrderLine:
     orderid: str
-    sku: str
-    qty: int
+    sku: Sku
+    qty: Quantity
 
 class Batch:
     def __init__(
-        self, ref: str, sku: str, qty: int, eta: Optional[date]
+        self, ref: Reference, sku: Sku, qty: Quantity, eta: Optional[date]
     ):
         self.reference = ref
         self.sku = sku
@@ -50,7 +57,7 @@ class Batch:
 
     #@property becomes a calculated field in the classe
     @property
-    def allocated_quantity(self) -> int:
+    def allocated_quantity(self) -> Quantity:
         """Current quantity allocated to orders
 
         Returns:
@@ -59,7 +66,7 @@ class Batch:
         return sum(line.qty for line in self._allocations)
 
     @property 
-    def available_quantity(self) -> int:
+    def available_quantity(self) -> Quantity:
         """Current quantity available for allocation
 
         Returns:
