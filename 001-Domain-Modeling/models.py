@@ -1,6 +1,5 @@
 from dataclasses import dataclass
-from locale import strcoll
-from typing import Optional, NewType
+from typing import List, Optional, NewType
 from datetime import date
 
 
@@ -8,6 +7,9 @@ from datetime import date
 Quantity = NewType("Quantity", int)
 Sku = NewType("Sku", str)
 Reference = NewType("Reference", str)
+
+class OutOfStock(Exception):
+    pass
 
 
 # frozen=True makes this immutable
@@ -37,6 +39,14 @@ class Batch:
     def __hash__(self):
         """Override the hash operator"""
         return hash(self.reference)
+
+    def __gt__(self, other):
+        """Override the gt operator for sorting"""
+        if self.eta is None:
+            return False
+        if other.eta is None:
+            return True
+        return self.eta > other.eta
 
     def can_allocate(self, line: OrderLine) -> bool:
         """Evaluates whether an order line can be allocated against this batch.
@@ -87,4 +97,21 @@ class Batch:
         return self._purchased_quantity - self.allocated_quantity
     
 
-    
+def allocate(line: OrderLine, batches: List[Batch]) -> Reference:
+    """Takes an order line and a list of batches and will allocate orders against batches intelligently
+
+    Args:
+        line (OrderLine): Order line container desired quantity
+        batches (List[Batch]): List of batches to order against
+
+    Returns:
+        Reference: reference id of the batch allocated against
+    """
+    try:
+        batch = next(
+            b for b in sorted(batches) if b.can_allocate(line)
+        )
+        batch.allocate(line)
+    except StopIteration:
+        raise OutOfStock(f"Out of stock for sku {line.sku}")
+    return batch.reference

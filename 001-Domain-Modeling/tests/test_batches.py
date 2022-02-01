@@ -31,7 +31,7 @@ def test_cannot_allocate_if_available_smaller_than_required():
 
 def test_can_allocate_if_available_equal_to_required():
     batch, line = make_batch_and_line("ELEGANT-LAMP", 2, 2)
-    
+
     assert batch.can_allocate(line)
 
 def test_cannot_allocate_if_skus_dont_match():
@@ -45,11 +45,3 @@ def test_can_only_deallocated_allocated_lines():
     batch.deallocate(line)
 
     assert batch.available_quantity == 20
-
-# def test_prefers_warehouse_batches_to_shipments():
-#     pytest.fail("todo")
-
-# def test_prefers_earlier_batches():
-#     pytest.fail("todo")
-
-
