@@ -10,7 +10,9 @@ Sku = NewType("Sku", str)
 Reference = NewType("Reference", str)
 
 
-@dataclass(frozen=True) #frozen=True makes this immutable
+# frozen=True makes this immutable
+# dataclasses offer value equality, if all fields are equal, objects are equal
+@dataclass(frozen=True) 
 class OrderLine:
     orderid: str
     sku: Sku
@@ -25,6 +27,16 @@ class Batch:
         self.eta = eta
         self._purchased_quantity = qty
         self._allocations = set() # Set allocations to an empty set
+
+    def __eq__(self, other):
+        """Override the equal operator"""
+        if not isinstance(other, Batch):
+            return False
+        return other.reference == self.reference
+    
+    def __hash__(self):
+        """Override the hash operator"""
+        return hash(self.reference)
 
     def can_allocate(self, line: OrderLine) -> bool:
         """Evaluates whether an order line can be allocated against this batch.
