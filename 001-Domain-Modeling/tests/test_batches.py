@@ -17,24 +17,24 @@ def test_can_allocate_if_available_greater_than_required():
     line = OrderLine('order-ref', "SMALL-TABLE", 2)
     batch.allocate(line)
 
-    assert line.status == "Success"
+    assert batch.available_quantity == 18
 
 def test_cannot_allocate_if_available_smaller_than_required():
     batch = Batch("batch-001", "BLUE-CUSHION", qty=1, eta=date.today())
     line = OrderLine('order-ref', "BLUE-CUSHION", 2)
     batch.allocate(line)
 
-    assert line.status == "Failed"
+    assert batch.available_quantity == 1
 
 def test_can_allocate_if_available_equal_to_required():
     batch = Batch("batch-001", "BLUE-CUSHION", qty=1, eta=date.today())
     line = OrderLine('order-ref', "BLUE-CUSHION", 1)
     batch.allocate(line)
 
-    assert line.status == "Success"
+    assert batch.available_quantity == 0
 
-def test_prefers_warehouse_batches_to_shipments():
-    pytest.fail("todo")
+# def test_prefers_warehouse_batches_to_shipments():
+#     pytest.fail("todo")
 
-def test_prefers_earlier_batches():
-    pytest.fail("todo")
+# def test_prefers_earlier_batches():
+#     pytest.fail("todo")
